@@ -43,6 +43,7 @@ contract NFTDutchAuction {
         if(auctionEnded && winnerAddress != address(0) && msg.sender != winnerAddress) {
             address payable refundCaller = payable(msg.sender);
             refundCaller.transfer(address(this).balance);
+            return winnerAddress;
         }
         // check if the auction has ended
         require(!auctionEnded, "Auction has ended");
@@ -62,10 +63,10 @@ contract NFTDutchAuction {
     }
     
     function updatePrice() internal {
-        if (block.number >= auctionEndBlock) {
-            auctionEnded = true;
-            return;
-        }
+        // if (block.number >= auctionEndBlock) {
+        //     auctionEnded = true;
+        //     return;
+        // }
         currentPrice = initialPrice - (offerPriceDecrement * (block.number - startBlockNumber));
     }
 }

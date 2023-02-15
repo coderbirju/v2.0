@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { Contract, Signer, utils } from 'ethers';
 
-describe('Deploy the Dutch Auction Contract', function () {
+describe('Test Dutch Auction Contract', function () {
 
 
   // async function deployContractDA() {
@@ -119,10 +119,36 @@ describe('Deploy the Dutch Auction Contract', function () {
         expect(error.message).to.equal("AssertionError: expected 'VM Exception while processing transac…' to equal 'Auction has ended'");
       }
     });
-  });    
+
+    it('should allow a bidder to place a bid during the auction', async () => {
+      const [bidder1] = await ethers.getSigners();
+      const winningBidAmount = 2000;
+      await contract.connect(bidder1).bid({ value: winningBidAmount });
+      const winnerAddress = await contract.winnerAddress();
+      expect(await bidder1.getAddress()).to.equal(winnerAddress);
+    }); 
+
+    it('should refund the losing bidder', async () => {
+      const [bidder1, bidder2] = await ethers.getSigners();
+      const winningBidAmount = 2000;
+      const losingBidAmount = 1500;
+      const differenceAmount = 66766;
+      await contract.connect(bidder1).bid({ value: winningBidAmount });
+      const balanceBefore = await bidder2.getBalance();
+
+      expect(await contract.connect(bidder2).bid({ value: losingBidAmount })).to.be.revertedWith('Auction has ended');
+      await contract.connect(bidder2).bid({ value: losingBidAmount });
+      const balanceAfter = await bidder2.getBalance();
+      expect(balanceBefore.sub(balanceAfter)).to.equal(differenceAmount);
+    });
+
+    it('should transfer the NFT to the winning bidder', async () => {
+      const [bidder1] = await ethers.getSigners();
+      const winningBidAmount = 2000;
+      await contract.connect(bidder1).bid({ value: winningBidAmount });
+      const winnerAddress = await contract.winnerAddress();
+      expect(await nftContract.ownerOf(1)).to.equal(winnerAddress);
+    });
+    
+  });
 });
-
-
-
-
-

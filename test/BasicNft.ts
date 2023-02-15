@@ -12,6 +12,8 @@ describe('Deploy the Dutch Auction Contract', function () {
         await contract.deployed();
         expect(await contract.name()).to.equal("BasicNft");
         expect(await contract.symbol()).to.equal("BNFT");
+        console.log(await contract.name());
+        console.log(await contract.symbol());
     });
 
     // it('Should return correct owner', async function () {});

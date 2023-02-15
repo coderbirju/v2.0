@@ -56,10 +56,6 @@ contract NFTDutchAuction {
         auctionEnded = true;
         winnerAddress = payable(msg.sender);
         addressOfOwner.transfer(msg.value);
-        // erc721TokenAddress.setApprovalForAll(address(this), true);
-        // transfer the nft to the winner
-
-        // console.log('msg.sender: inside bid', msg.sender);
         erc721TokenAddress.transferFrom(addressOfOwner, winnerAddress, nftTokenId);
         winningBidAmount = msg.value;
         return winnerAddress;

@@ -6,44 +6,42 @@ import { Contract, Signer, utils } from 'ethers';
 describe('Deploy the Dutch Auction Contract', function () {
 
 
-  async function deployContractDA() {
+  // async function deployContractDA() {
 
-    const RESERVE_PRICE = 1000;
-    const NUM_BLOCKS_AUCTION_OPEN = 10;
-    const PRICE_DECREMENT = 100;
-    const TOKEN_ID = 1;
-    // Contracts are deployed using the first signer/account by default
-    const Contract = await ethers.getContractFactory('NFTDutchAuction');
-    const NftContract = await ethers.getContractFactory('BasicNft');
-    // const [addr1, addr2, addr3] = await ethers.getSigners();
-    const nftContract = await NftContract.deploy("BasicNft", "BNFT");
-    await nftContract.deployed();
-    nftContract.mintNFTtoken();
-    const contract = await Contract.deploy(
-      nftContract.address,
-      TOKEN_ID,
-      RESERVE_PRICE,
-      NUM_BLOCKS_AUCTION_OPEN,
-      PRICE_DECREMENT,
-    );
+  //   const RESERVE_PRICE = 1000;
+  //   const NUM_BLOCKS_AUCTION_OPEN = 10;
+  //   const PRICE_DECREMENT = 100;
+  //   const TOKEN_ID = 1;
+  //   // Contracts are deployed using the first signer/account by default
+  //   const Contract = await ethers.getContractFactory('NFTDutchAuction');
+  //   const NftContract = await ethers.getContractFactory('BasicNft');
+  //   // const [addr1, addr2, addr3] = await ethers.getSigners();
+  //   const nftContract = await NftContract.deploy("BasicNft", "BNFT");
+  //   await nftContract.deployed();
+  //   nftContract.mintNFTtoken();
+  //   const contract = await Contract.deploy(
+  //     nftContract.address,
+  //     TOKEN_ID,
+  //     RESERVE_PRICE,
+  //     NUM_BLOCKS_AUCTION_OPEN,
+  //     PRICE_DECREMENT,
+  //   );
     
-    await contract.deployed();
-    return {  contract, nftContract, RESERVE_PRICE, NUM_BLOCKS_AUCTION_OPEN, PRICE_DECREMENT};
-  }
+  //   await contract.deployed();
+  //   return {  contract, nftContract, RESERVE_PRICE, NUM_BLOCKS_AUCTION_OPEN, PRICE_DECREMENT};
+  // }
 
-  it('Should Deploy contract correctly', async function () {
-    const { contract } = await loadFixture(deployContractDA);
+  // it('Should Deploy contract correctly', async function () {
+  //   const { contract } = await loadFixture(deployContractDA);
 
-    expect(await contract.deployed());
-  });
+  //   expect(await contract.deployed());
+  // });
 
   describe('Working of the NFTDutchAuction', () => {
     let contract: Contract;
     let nftContract: Contract;
     let owner: Signer;
     let nftOwner: Signer;
-    let auctionEndBlock: number;
-    let initialPrice: number;
   
     beforeEach(async () => {
       const RESERVE_PRICE = 1000;
@@ -54,10 +52,9 @@ describe('Deploy the Dutch Auction Contract', function () {
       [owner, nftOwner] = await ethers.getSigners();
       const Contract = await ethers.getContractFactory('NFTDutchAuction');
       const NftContract = await ethers.getContractFactory('BasicNft');
-      nftContract = await NftContract.connect(owner).deploy("BasicNft", "BNFT");
+      nftContract = await NftContract.connect(nftOwner).deploy("BasicNft", "BNFT");
       await nftContract.deployed();
-      nftContract.connect(owner).mintNFTtoken();
-      // nftContract.connect(nftOwner).mintNFTtoken();
+      await nftContract.connect(nftOwner).mintNFTtoken();
       contract = await Contract.connect(owner).deploy(
         nftContract.address,
         TOKEN_ID,
@@ -66,6 +63,7 @@ describe('Deploy the Dutch Auction Contract', function () {
         PRICE_DECREMENT,
       );
       await contract.deployed();
+      await nftContract.connect(nftOwner).approve(contract.address, TOKEN_ID);
     });
   
     it('should deploy the contract', async () => {
@@ -91,7 +89,7 @@ describe('Deploy the Dutch Auction Contract', function () {
       expect(result.hash).to.not.be.null;
     });
 
-    it.only('should not allow bidding below the current price', async () => {
+    it('should not allow bidding below the current price', async () => {
       try {
         await contract.bid({ value: 1500});
       } catch (error: any) {

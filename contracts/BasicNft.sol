@@ -16,15 +16,8 @@ contract BasicNft is ERC721 {
     }
 
     function mintNFTtoken() public {        
+        require(msg.sender == owner, "Only owner can mint");
         _safeMint(msg.sender, tokenId);
-        // console.log('tokenId: ', tokenId);
-        // console.log('ownerOf(_tokenId): inside NFT', ownerOf(tokenId));
         tokenId++;
-    }
-
-    // function giveApproval(address _to, uint256 _tokenId) public {
-    //     require(msg.sender == ownerOf(_tokenId), "You are not the owner of this token");
-    //     approve(_to, _tokenId);
-    // }
-    
+    }   
 }
